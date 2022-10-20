@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "IntDequeue.h"
 #include "lower_bound.h"
 #include "branch_and_bound.h"
