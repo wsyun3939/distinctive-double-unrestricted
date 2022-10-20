@@ -33,7 +33,7 @@ int main(void) {
 	FILE *fp_read=NULL;
 		for (int a = NUMBER; a < NUMBER+100*TIER; a++) {
 			FILE * fp = NULL;
-			sprintf(filename, "/Users/watanabeshun/Documents/Benchmark/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
+			sprintf(filename, "../Benchmark/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
 			printf("%s\n", filename);
 
 			//	読み込みモードでファイルを開く
@@ -58,9 +58,9 @@ int main(void) {
 			qsort(stack, STACK, sizeof(IntDequeue), (int(*)(const void *, const void *))pricmp);
 			printf("sort:\n");
 			Array_print(stack);
-			//int UB=UpperBound(stack,both);
+			int UB=UpperBound(stack);
 			int UB_cur = LB1;
-			int min_relocation = branch_and_bound(stack, 100, UB_cur, LB1, both,0);
+			int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both,0,clock());
 			//int min_relocation = enumerate_relocation(stack, depth,both);
 			sum += min_relocation;
 			if (min_relocation == LB1) {
@@ -71,18 +71,10 @@ int main(void) {
 			fclose(fp);
 
 			if (a % 100 == 1) {
-				sprintf(filename, "/Users/watanabeshun/Documents/Benchmark/%d-%d-%d(unrestricted).csv", TIER, STACK, nblock);
+				sprintf(filename, "../Benchmark/%d-%d-%d(unrestricted).csv", TIER, STACK, nblock);
 				fp_write = fopen(filename, "w");
-				sprintf(filename, "/Users/watanabeshun/Documents/Benchmark/%d-%d-%d.csv", TIER, STACK, nblock);
-				fp_read=fopen(filename, "r");
 			}
 			fscanf(fp_read, "%d ", &x);
-			if (x != min_relocation) {
-				printf("missmatch\n");
-				printf("%d\n", a);
-				miss++;
-			}
-			//「fprintfExample.txt」に「aは100です」と書き込む
     		fprintf(fp_write, "%d\n", min_relocation);
 		Array_clear(stack);
 		if (a % 100 == 0) {
@@ -92,6 +84,6 @@ int main(void) {
 		}
 	Array_terminate(stack);
 	clock_t end=clock();
-	printf("time:%f,match:%d,missmatch:%d,ave_relocation:%f,ave_difference%f\n", (double)(end - start) / CLOCKS_PER_SEC, k,miss,(double)sum/(100*TIER),(double)difference/(100*TIER-k));
+	printf("time:%f,match:%d,ave_relocation:%f,ave_difference%f\n", (double)(end - start) / CLOCKS_PER_SEC, k,(double)sum/(100*TIER),(double)difference/(100*TIER-k));
 	return 0;
 }
