@@ -74,7 +74,6 @@ int main(void) {
 				sprintf(filename, "../Benchmark/%d-%d-%d(unrestricted).csv", TIER, STACK, nblock);
 				fp_write = fopen(filename, "w");
 			}
-			fscanf(fp_read, "%d ", &x);
     		fprintf(fp_write, "%d\n", min_relocation);
 		Array_clear(stack);
 		if (a % 100 == 0) {
