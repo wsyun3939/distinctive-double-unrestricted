@@ -71,7 +71,7 @@ int main(void) {
 			fclose(fp);
 
 			if (a % 100 == 1) {
-				sprintf(filename, "../Benchmark/%d-%d-%d(unrestricted).csv", TIER, STACK, nblock);
+				sprintf(filename, "../Benchmark/%d-%d-%d_unrestricted.csv", TIER, STACK, nblock);
 				fp_write = fopen(filename, "w");
 			}
     		fprintf(fp_write, "%d\n", min_relocation);
