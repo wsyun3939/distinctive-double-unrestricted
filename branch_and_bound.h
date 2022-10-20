@@ -17,7 +17,7 @@ typedef struct {
 }	LB_idx;
 #endif
 
-int branch_and_bound(IntDequeue *q,int UB,int UB_cur,int LB,direction Dir,int DstDeque);
+int branch_and_bound(IntDequeue *q,int UB,int UB_cur,int LB,direction Dir,int DstDeque,clock_t start);
 
 int insert_sort(IntDequeue *q);
 
@@ -35,11 +35,7 @@ direction pre_retrieval_direction(IntDequeue *q,int *LB);
 int LBcmp(const LB_idx *n1, const LB_idx *n2);
 
 //*---近似解法により上界値を求める---*//
-int UpperBound(const IntDequeue *q, direction dir);
+int UpperBound(const IntDequeue *q);
 
-LB_idx* CreateBlockingTable(IntDequeue *q, direction dir, int *Size);
-
-//*---全列挙により最適値を求める---*//
-int enumerate_relocation(IntDequeue *q, int depth, direction Dir);
 
 #endif
