@@ -14,9 +14,9 @@ int nblocking_upper(IntDequeue *q);
 int nblocking(IntDequeue *q, direction dir);
 
 //*---一つのスタックにおいて、すべてのブロックを取り出すまでの最小積み替え回数---*//
-int min_relocation(IntDequeue *q,direction dir);
+int min_relocation(IntDequeue *q, direction dir);
 
-int pre_min_relocation(IntDequeue *q,direction dir);
+int pre_min_relocation(IntDequeue *q, direction dir);
 
 int min_relocation_upper(IntDequeue *q);
 

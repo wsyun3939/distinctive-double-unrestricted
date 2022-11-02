@@ -18,71 +18,94 @@ Nblocking_lower_again:下側から移動させた後もブロッキングブロ�
 
 */
 
-int main(void) {
+int main(void)
+{
 	clock_t start = clock();
-	IntDequeue* stack = malloc(STACK*(sizeof *stack));
+	IntDequeue *stack = malloc(STACK * (sizeof *stack));
 	Array_initialize(stack);
 	int nblock = NBLOCK;
 	int i, j, x, l;
 	int k = 0;
 	int sum = 0;
-	int miss=0;
-	int difference=0;
+
+	int gap = 0;
+	int UB_gap = 0;
+
+	int timeup = 0;
+	int infeasible = 0;
+
 	char filename[BUFFER];
 	FILE *fp_write = NULL;
-	FILE *fp_read=NULL;
-		for (int a = NUMBER; a < NUMBER+100*TIER; a++) {
-			FILE * fp = NULL;
-			sprintf(filename, "../Benchmark/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
-			printf("%s\n", filename);
+	FILE *fp_read = NULL;
+	for (int a = NUMBER; a < NUMBER + 100 * TIER; a++)
+	{
+		FILE *fp = NULL;
+		sprintf(filename, "../Benchmark/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
+		printf("%s\n", filename);
 
-			//	読み込みモードでファイルを開く
-			fp=fopen(filename, "r");
+		//	読み込みモードでファイルを開く
+		fp = fopen(filename, "r");
 
-			// スタック数と高さを読み込む　//
-			fscanf(fp, "%d %d", &i, &j);
-			for (i = 0; i < STACK; i++) {
-				fscanf(fp, "%d ", &l);
-				for (j = 0; j < l; j++) {
-					fscanf(fp, "%d ", &x);
-					EnqueRear(&stack[i], x);
-				}
-			}
-
-			
-			//*---LB1---*//
-			int LB1 = lower_bound1(stack);
-			printf("LB1:%d\n", LB1);
-
-
-			qsort(stack, STACK, sizeof(IntDequeue), (int(*)(const void *, const void *))pricmp);
-			printf("sort:\n");
-			Array_print(stack);
-			int UB=UpperBound(stack);
-			int UB_cur = LB1;
-			int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both,0,clock());
-			//int min_relocation = enumerate_relocation(stack, depth,both);
-			sum += min_relocation;
-			if (min_relocation == LB1) {
-				k++;
-			}
-			difference+=min_relocation-LB1;
-			printf("min_relocation:%d,difference:%d\n", min_relocation, min_relocation - LB1); 
-			fclose(fp);
-
-			if (a % 100 == 1) {
-				sprintf(filename, "../Benchmark/%d-%d-%d_unrestricted.csv", TIER, STACK, nblock);
-				fp_write = fopen(filename, "w");
-			}
-    		fprintf(fp_write, "%d\n", min_relocation);
-		Array_clear(stack);
-		if (a % 100 == 0) {
-				nblock++;
-				fclose(fp_write);
+		// スタック数と高さを読み込む　//
+		fscanf(fp, "%d %d", &i, &j);
+		for (i = 0; i < STACK; i++)
+		{
+			fscanf(fp, "%d ", &l);
+			for (j = 0; j < l; j++)
+			{
+				fscanf(fp, "%d ", &x);
+				EnqueRear(&stack[i], x);
 			}
 		}
+
+		//*---LB1---*//
+		int LB1 = lower_bound1(stack);
+		printf("LB1:%d\n", LB1);
+
+		qsort(stack, STACK, sizeof(IntDequeue), (int (*)(const void *, const void *))pricmp);
+		printf("sort:\n");
+		Array_print(stack);
+		int UB = UpperBound(stack);
+		int UB_cur = LB1;
+		int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both, 0, clock());
+		if (min_relocation == -1)
+		{
+			timeup++;
+		}
+		else
+		{
+			sum += min_relocation;
+			gap += min_relocation - LB1;
+			if (UB != 0)
+			{
+				UB_gap += UB - min_relocation;
+			}
+			else
+				infeasible++;
+		}
+		if (min_relocation == LB1)
+		{
+			k++;
+		}
+		printf("min_relocation:%d,difference:%d\n", min_relocation, min_relocation - LB1);
+		fclose(fp);
+
+		if (a % 100 == 1)
+		{
+			sprintf(filename, "../Benchmark/%d-%d-%d_unrestricted.csv", TIER, STACK, nblock);
+			fp_write = fopen(filename, "w");
+		}
+		if (fp_write != NULL)
+			fprintf(fp_write, "%d\n", min_relocation);
+		Array_clear(stack);
+		if (a % 100 == 0)
+		{
+			nblock++;
+			fclose(fp_write);
+		}
+	}
 	Array_terminate(stack);
-	clock_t end=clock();
-	printf("time:%f,match:%d,ave_relocation:%f,ave_difference%f\n", (double)(end - start) / CLOCKS_PER_SEC, k,(double)sum/(100*TIER),(double)difference/(100*TIER-k));
+	clock_t end = clock();
+	printf("time:%f,match:%d,ave:%f,gap%f,timeup:%d,infeasible:%d,UB_gap:%f\n", (double)(end - start) / CLOCKS_PER_SEC, k, (double)sum / (100 * TIER), (double)gap / (100 * TIER - k), timeup, infeasible, (double)UB_gap / (100 * TIER - timeup - infeasible));
 	return 0;
 }

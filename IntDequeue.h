@@ -3,13 +3,14 @@
 #include "data_info.h"
 
 /*--- キューを実現する構造体 ---*/
-typedef struct {
-	int max;		/* キューの容量 */
-	int num;		/* 現在の要素数 */
-	int front;		/* 先頭要素カーソル */
-	int rear;		/* 末尾要素カーソル */
-	int *que;		/* キュー本体（の先頭要素へのポインタ）*/
-	int min_idx;/*キューの中で最小値をとる添え字へのカーソル*/
+typedef struct
+{
+	int max;	   /* キューの容量 */
+	int num;	   /* 現在の要素数 */
+	int front;	   /* 先頭要素カーソル */
+	int rear;	   /* 末尾要素カーソル */
+	int *que;	   /* キュー本体（の先頭要素へのポインタ）*/
+	int min_idx;   /*キューの中で最小値をとる添え字へのカーソル*/
 	direction dir; /*取り出すときにお得な方向*/
 	int LB;
 } IntDequeue;
@@ -39,7 +40,7 @@ int PushFront(IntDequeue *q, int x);
 
 int PushRear(IntDequeue *q, int x);
 
-int Push(IntDequeue *q, int x,direction dir);
+int Push(IntDequeue *q, int x, direction dir);
 
 /*--- キューの先頭からデータをデキュー(下界値計算も行う) ---*/
 int DequeFront(IntDequeue *q, int *x);
@@ -109,10 +110,10 @@ void Terminate(IntDequeue *q);
 int SearchMin(IntDequeue *q);
 
 /*---キューのコピー---*/
-void Copy(IntDequeue *q1,const IntDequeue *q2);
+void Copy(IntDequeue *q1, const IntDequeue *q2);
 
 /*---配列キューのコピー---*/
-void Array_copy(IntDequeue *q1,const IntDequeue *q2);
+void Array_copy(IntDequeue *q1, const IntDequeue *q2);
 
 /*---配列キューの後始末---*/
 void Array_terminate(IntDequeue *q);
