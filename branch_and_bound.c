@@ -24,7 +24,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 			UB = UB_temp + depth;
 		}
 	}
-	
+
 	if (UB == UB_cur)
 	{
 		depth = 0;
@@ -132,6 +132,17 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 			{
 				PriorityEdge = q[i].que[(q[i].front + q[i].num - 1) % q[i].max];
 				SecondPosition = (q[i].front + q[i].num - 2) % q[i].max;
+			}
+			int num_open = 0;
+			for (d = 0; d <= STACK - 1; d++)
+			{
+				if (d == i)
+					continue;
+				num_open += TIER - q[d].num;
+			}
+			if (num_open < nblocking(q, dir))
+			{
+				continue;
 			}
 			LB_temp = LB - q[i].LB;
 			Deque(&q[i], &num_ret, dir);
@@ -338,6 +349,17 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 				PriorityEdge = q[i].que[(q[i].front + q[i].num - 1) % q[i].max];
 				SecondPosition = (q[i].front + q[i].num - 2) % q[i].max;
 			}
+			int num_open = 0;
+			for (d = 1; d <= STACK - 1; d++)
+			{
+				if (d == i)
+					continue;
+				num_open += TIER - q[d].num;
+			}
+			if (num_open < nblocking(q, dir))
+			{
+				continue;
+			}
 			LB_temp = LB - q[i].LB;
 			Deque(&q[i], &num_ret, dir);
 			LB_temp += q[i].LB;
@@ -353,7 +375,6 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 						q_temp = malloc(STACK * (sizeof *q_temp));
 						Array_initialize(q_temp);
 						Array_copy(q_temp, q);
-						Deque(&q_temp[0], &num_ret, dir);
 						for (j = 1; j < STACK; j++)
 						{
 							BG_index[i][j] = Enque(&q_temp[j], PriorityEdge, dir);
