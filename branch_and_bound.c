@@ -15,6 +15,16 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 	static int SecondPosition = 0;
 	static int MinRelocation = 0;
 	int BG_index[STACK][STACK] = {0};
+
+	if (depth + LB == UB_cur - 1)
+	{
+		int UB_temp = UpperBound(q);
+		if (UB > UB_temp + depth && UB_temp != -1)
+		{
+			UB = UB_temp + depth;
+		}
+	}
+	
 	if (UB == UB_cur)
 	{
 		depth = 0;
