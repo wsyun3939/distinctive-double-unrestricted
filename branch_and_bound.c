@@ -33,6 +33,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 	int i = 0;
 	int j = 0;
 	int d = 0;
+	int k = 0;
 	int LB_temp = 0;
 	int PriorityEdge = 0;
 	direction dir = Dir;
@@ -134,11 +135,11 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 				SecondPosition = (q[i].front + q[i].num - 2) % q[i].max;
 			}
 			int num_open = 0;
-			for (d = 0; d <= STACK - 1; d++)
+			for (k = 0; k <= STACK - 1; k++)
 			{
-				if (d == i)
+				if (k == i)
 					continue;
-				num_open += TIER - q[d].num;
+				num_open += TIER - q[k].num;
 			}
 			if (num_open < nblocking(q, dir))
 			{
@@ -350,11 +351,11 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 				SecondPosition = (q[i].front + q[i].num - 2) % q[i].max;
 			}
 			int num_open = 0;
-			for (d = 1; d <= STACK - 1; d++)
+			for (k = 1; k <= STACK - 1; k++)
 			{
-				if (d == i)
+				if (k == i)
 					continue;
-				num_open += TIER - q[d].num;
+				num_open += TIER - q[k].num;
 			}
 			if (num_open < nblocking(q, dir))
 			{
