@@ -43,7 +43,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 	clock_t end;
 
 	end = clock();
-	if (((double)(end - start) / CLOCKS_PER_SEC) > 7200)
+	if (((double)(end - start) / CLOCKS_PER_SEC) > 1800)
 	{
 		depth = 0;
 		return -1;

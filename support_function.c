@@ -279,6 +279,7 @@ int UpperBound(const IntDequeue *q)
 	direction dir = lower;
 	direction DirNext = lower;
 
+	qsort(q_temp + 1, STACK - 1, sizeof(IntDequeue), (int (*)(const void *, const void *))pricmp);
 	while (!(IsEmpty(&q_temp[0])))
 	{
 		switch (DirNext)
