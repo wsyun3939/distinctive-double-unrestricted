@@ -325,7 +325,7 @@ int UpperBound(const IntDequeue *q)
 			Array_print(q_temp);
 #endif
 		}
-		//　積み替え操作　
+		// 　積み替え操作　
 		UB++;
 
 #if TEST == 0
@@ -349,6 +349,17 @@ int UpperBound(const IntDequeue *q)
 			{
 				dir = q_temp[0].que[q_temp[0].front] < q_temp[0].que[(q_temp[0].front + q_temp[0].num - 1) % q_temp[0].max] ? lower : upper;
 			}
+		}
+		int num_open = 0;
+		for (int d = 1; d <= STACK - 1; d++)
+		{
+			num_open += TIER - q_temp[d].num;
+		}
+		if (num_open < nblocking(q_temp, dir))
+		{
+			Array_terminate(q_temp);
+			free(q_temp);
+			return -1;
 		}
 		if (dir == lower)
 		{
