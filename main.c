@@ -76,7 +76,6 @@ int main(void)
 
 		time_start = clock();
 		int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both, 0, clock());
-		sol_lapse += clock() - time_start;
 
 		if (min_relocation == -1)
 		{
@@ -84,6 +83,7 @@ int main(void)
 		}
 		else
 		{
+			sol_lapse += clock() - time_start;
 			sum += min_relocation;
 			gap += min_relocation - LB1;
 			if (UB != 0)
