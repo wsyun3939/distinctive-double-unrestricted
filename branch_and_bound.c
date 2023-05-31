@@ -14,7 +14,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 	static int depth = 0;
 	static int SecondPosition = 0;
 	static int MinRelocation = 0;
-	int BG_index[STACK][STACK] = {0};
+	int BG_index[STACK][2 * STACK] = {0};
 
 	if (depth + LB == UB_cur - 1)
 	{
@@ -107,16 +107,16 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 	printf("Block relocation(depth=%d)\n", depth);
 #endif
 
-	//　積み替え操作　デックiからデックjへ
-	// BGもしくはGG積み替えを優先．
-	//ない場合は，優先順位の最も低いデックに積んでおく
+	// 　積み替え操作　デックiからデックjへ
+	//  BGもしくはGG積み替えを優先．
+	// ない場合は，優先順位の最も低いデックに積んでおく
 	for (i = 0; i < STACK; i++)
 	{
 		dir = q[i].dir;
 		if (dir == both)
 			dir = q[i].que[q[i].front] < q[i].que[(q[i].front + q[i].num - 1) % q[i].max] ? lower : upper;
 		for (d = 0; d <= 1; d++)
-		{ //下界値を与える方向から順に積み替えを吟味する
+		{ // 下界値を与える方向から順に積み替えを吟味する
 			if (d == 1)
 			{
 				if (dir == lower)
@@ -153,15 +153,15 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 			else
 			{
 				if (i == 0)
-				{ //ターゲットデックにおける積み替え
+				{ // ターゲットデックにおける積み替え
 					if (SecondPosition == q[0].min_idx)
-					{ //積み替え後，取り出しが可能な場合
+					{ // 積み替え後，取り出しが可能な場合
 						DirNext = both;
 						q_temp = malloc(STACK * (sizeof *q_temp));
 						Array_initialize(q_temp);
 						Array_copy(q_temp, q);
 						if (PriorityEdge == q[0].que[q[0].min_idx] + 1)
-						{ //ドミナンス
+						{ // ドミナンス
 
 #if TEST == 0
 							printf("Priority Retrieval:%d,%d\n", num_ret - 1, num_ret);
@@ -197,6 +197,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								if (BG_index[i][j] != -1)
 									Deque(&q_temp[j], &num_ret, dir);
 							}
+							for (j = STACK; j < 2 * STACK; j++)
+							{
+								BG_index[i][j] = Enque(&q_temp[j - STACK], PriorityEdge, 1 - dir);
+								if (BG_index[i][j] != -1)
+									Deque(&q_temp[j - STACK], &num_ret, 1 - dir);
+							}
 							for (j = STACK - 1; j > 0; j--)
 							{
 								if (BG_index[i][j] == 0)
@@ -205,6 +211,37 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 
 #if TEST == 0
 									printf("relocation(%d,%d)\n", i, j);
+									Array_print(q_temp);
+#endif
+
+									ans = branch_and_bound(q_temp, UB, UB_cur, LB_temp, DirNext, j, start);
+									if (ans != 0 && ans != -1)
+									{
+										Array_terminate(q_temp);
+										free(q_temp);
+										return MinRelocation;
+									}
+									else if (ans == -1)
+									{
+										Array_terminate(q_temp);
+										free(q_temp);
+										return -1;
+									}
+									Array_copy(q_temp, q);
+
+#if TEST == 0
+									Array_print(q_temp);
+#endif
+								}
+							}
+							for (j = 2 * STACK - 1; j >= STACK; j--)
+							{
+								if (BG_index[i][j] == 0)
+								{
+									Enque(&q_temp[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+									printf("relocation(%d,%d)\n", i, j - STACK);
 									Array_print(q_temp);
 #endif
 
@@ -240,6 +277,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							if (BG_index[i][j] != -1)
 								Deque(&q[j], &num_ret, dir);
 						}
+						for (j = STACK; j < 2 * STACK; j++)
+						{
+							BG_index[i][j] = Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+							if (BG_index[i][j] != -1)
+								Deque(&q[j - STACK], &num_ret, 1 - dir);
+						}
 						for (j = STACK - 1; j > 0; j--)
 						{
 							if (BG_index[i][j] == 0 && !(i == DstDeque && dir == Dir))
@@ -251,7 +294,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								Array_print(q);
 #endif
 
-								ans = branch_and_bound(q, UB, UB_cur, LB_temp, lower, j, start);
+								ans = branch_and_bound(q, UB, UB_cur, LB_temp, dir, j, start);
 								if (ans != 0 && ans != -1)
 								{
 									return MinRelocation;
@@ -261,6 +304,33 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 									return -1;
 								}
 								Deque(&q[j], &num_ret, dir);
+
+#if TEST == 0
+								Array_print(q);
+#endif
+							}
+						}
+						for (j = 2 * STACK - 1; j >= STACK; j--)
+						{
+							if (BG_index[i][j] == 0 && !(i == DstDeque && (1 - dir) == Dir))
+							{
+								Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+								printf("relocation(%d,%d)\n", i, j - STACK);
+								Array_print(q);
+#endif
+
+								ans = branch_and_bound(q, UB, UB_cur, LB_temp, 1 - dir, j, start);
+								if (ans != 0 && ans != -1)
+								{
+									return MinRelocation;
+								}
+								else if (ans == -1)
+								{
+									return -1;
+								}
+								Deque(&q[j - STACK], &num_ret, 1 - dir);
 
 #if TEST == 0
 								Array_print(q);
@@ -282,6 +352,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								Deque(&q[j], &num_ret, dir);
 						}
 					}
+					for (j = STACK; j < 2 * STACK; j++)
+					{
+						BG_index[i][j] = Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+						if (BG_index[i][j] != -1)
+							Deque(&q[j - STACK], &num_ret, 1 - dir);
+					}
 					for (j = STACK - 1; j >= 0; j--)
 					{
 						if (j == i)
@@ -297,7 +373,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								Array_print(q);
 #endif
 
-								ans = branch_and_bound(q, UB, UB_cur, LB_temp, lower, j, start);
+								ans = branch_and_bound(q, UB, UB_cur, LB_temp, dir, j, start);
 								if (ans != 0 && ans != -1)
 								{
 									return MinRelocation;
@@ -314,6 +390,33 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							}
 						}
 					}
+					for (j = 2 * STACK - 1; j >= STACK; j--)
+					{
+						if (BG_index[i][j] == 0 && !(i == DstDeque && (1 - dir) == Dir))
+						{
+							Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+							printf("relocation(%d,%d)\n", i, j - STACK);
+							Array_print(q);
+#endif
+
+							ans = branch_and_bound(q, UB, UB_cur, LB_temp, 1 - dir, j, start);
+							if (ans != 0 && ans != -1)
+							{
+								return MinRelocation;
+							}
+							else if (ans == -1)
+							{
+								return -1;
+							}
+							Deque(&q[j - STACK], &num_ret, dir);
+
+#if TEST == 0
+							Array_print(q);
+#endif
+						}
+					}
 				}
 			}
 			Enque(&q[i], PriorityEdge, dir);
@@ -324,15 +427,15 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 		}
 	}
 
-	//　積み替え操作　デックiからデックjへ
-	//ブロッキングとなる積み替え
+	// 　積み替え操作　デックiからデックjへ
+	// ブロッキングとなる積み替え
 	for (i = 0; i < STACK; i++)
 	{
 		dir = q[i].dir;
 		if (dir == both)
 			dir = q[i].que[q[i].front] < q[i].que[(q[i].front + q[i].num - 1) % q[i].max] ? lower : upper;
 		for (d = 0; d <= 1; d++)
-		{ //下界値を与える方向から順に積み替えを吟味する
+		{ // 下界値を与える方向から順に積み替えを吟味する
 			if (d == 1)
 			{
 				if (dir == lower)
@@ -369,9 +472,9 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 			else
 			{
 				if (i == 0)
-				{ //ターゲットデックにおける積み替え
+				{ // ターゲットデックにおける積み替え
 					if (SecondPosition == q[0].min_idx)
-					{ //積み替え後，取り出しが可能な場合
+					{ // 積み替え後，取り出しが可能な場合
 						DirNext = both;
 						q_temp = malloc(STACK * (sizeof *q_temp));
 						Array_initialize(q_temp);
@@ -382,6 +485,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							if (BG_index[i][j] != -1)
 								Deque(&q_temp[j], &num_ret, dir);
 						}
+						for (j = STACK; j < 2 * STACK; j++)
+						{
+							BG_index[i][j] = Enque(&q_temp[j - STACK], PriorityEdge, 1 - dir);
+							if (BG_index[i][j] != -1)
+								Deque(&q_temp[j - STACK], &num_ret, 1 - dir);
+						}
 						for (j = STACK - 1; j > 0; j--)
 						{
 							if (BG_index[i][j] == 1 && !(i == DstDeque && dir == Dir))
@@ -390,6 +499,37 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 
 #if TEST == 0
 								printf("relocation(%d,%d)\n", i, j);
+								Array_print(q_temp);
+#endif
+
+								ans = branch_and_bound(q_temp, UB, UB_cur, LB_temp + 1, DirNext, j, start);
+								if (ans != 0 && ans != -1)
+								{
+									Array_terminate(q_temp);
+									free(q_temp);
+									return MinRelocation;
+								}
+								else if (ans == -1)
+								{
+									Array_terminate(q_temp);
+									free(q_temp);
+									return -1;
+								}
+								Array_copy(q_temp, q);
+
+#if TEST == 0
+								Array_print(q_temp);
+#endif
+							}
+						}
+						for (j = 2 * STACK - 1; j >= STACK; j--)
+						{
+							if (BG_index[i][j] == 1 && !(i == DstDeque && (1 - dir) == Dir))
+							{
+								Enque(&q_temp[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+								printf("relocation(%d,%d)\n", i, j - STACK);
 								Array_print(q_temp);
 #endif
 
@@ -424,6 +564,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							if (BG_index[i][j] != -1)
 								Deque(&q[j], &num_ret, dir);
 						}
+						for (j = STACK; j < 2 * STACK; j++)
+						{
+							BG_index[i][j] = Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+							if (BG_index[i][j] != -1)
+								Deque(&q[j - STACK], &num_ret, 1 - dir);
+						}
 						for (j = STACK - 1; j >= 0; j--)
 						{
 							if (BG_index[i][j] == 1 && !(i == DstDeque && dir == Dir))
@@ -435,7 +581,34 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								Array_print(q);
 #endif
 
-								ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, lower, j, start);
+								ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, dir, j, start);
+								if (ans != 0 && ans != -1)
+								{
+									return MinRelocation;
+								}
+								else if (ans == -1)
+								{
+									return -1;
+								}
+								Deque(&q[j], &num_ret, dir);
+
+#if TEST == 0
+								Array_print(q);
+#endif
+							}
+						}
+						for (j = 2 * STACK - 1; j >= STACK; j--)
+						{
+							if (BG_index[i][j] == 1 && !(i == DstDeque && (1 - dir) == Dir))
+							{
+								Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+								printf("relocation(%d,%d)\n", i, j - STACK);
+								Array_print(q);
+#endif
+
+								ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, 1 - dir, j, start);
 								if (ans != 0 && ans != -1)
 								{
 									return MinRelocation;
@@ -466,6 +639,12 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								Deque(&q[j], &num_ret, dir);
 						}
 					}
+					for (j = STACK; j < 2 * STACK; j++)
+					{
+						BG_index[i][j] = Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+						if (BG_index[i][j] != -1)
+							Deque(&q[j - STACK], &num_ret, 1 - dir);
+					}
 					for (j = STACK - 1; j >= 0; j--)
 					{
 						if (BG_index[i][j] == 1 && j != i && !(i == DstDeque && dir == Dir))
@@ -487,6 +666,33 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								return -1;
 							}
 							Deque(&q[j], &num_ret, dir);
+
+#if TEST == 0
+							Array_print(q);
+#endif
+						}
+					}
+					for (j = 2 * STACK - 1; j >= STACK; j--)
+					{
+						if (BG_index[i][j] == 1 && !(i == DstDeque && (1 - dir) == Dir))
+						{
+							Enque(&q[j - STACK], PriorityEdge, 1 - dir);
+
+#if TEST == 0
+							printf("relocation(%d,%d)\n", i, j - STACK);
+							Array_print(q);
+#endif
+
+							ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, 1 - dir, j, start);
+							if (ans != 0 && ans != -1)
+							{
+								return MinRelocation;
+							}
+							else if (ans == -1)
+							{
+								return -1;
+							}
+							Deque(&q[j - STACK], &num_ret, 1 - dir);
 
 #if TEST == 0
 							Array_print(q);
