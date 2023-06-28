@@ -21,6 +21,7 @@ Nblocking_lower_again:下側から移動させた後もブロッキングブロ�
 int main(void)
 {
 	clock_t start = clock();
+	clock_t max = 0;
 	clock_t UB_lapse = 0;
 	clock_t sol_lapse = 0;
 
@@ -32,6 +33,7 @@ int main(void)
 	int sum = 0;
 
 	int gap = 0;
+	int max_gap = 0;
 	int UB_gap = 0;
 
 	int timeup = 0;
@@ -84,8 +86,12 @@ int main(void)
 		else
 		{
 			sol_lapse += clock() - time_start;
+			if (max < clock() - time_start)
+				max = clock() - time_start;
 			sum += min_relocation;
 			gap += min_relocation - LB1;
+			if (max_gap < min_relocation - LB1)
+				max_gap = min_relocation - LB1;
 			if (UB != 0)
 			{
 				UB_gap += UB - min_relocation;
@@ -118,9 +124,6 @@ int main(void)
 	clock_t end = clock();
 
 	putchar('\n');
-	printf("time:%f,match:%d,ave:%f,gap%f,timeup:%d,infeasible:%d,UB_gap:%f\n", (double)(end - start) / CLOCKS_PER_SEC, k, (double)sum / (100 * TIER), (double)gap / (100 * TIER - k), timeup, infeasible, (double)UB_gap / (100 * TIER - timeup - infeasible));
-
-	printf("UB_lapse:%f,sol_lapse:%f\n", (double)UB_lapse / CLOCKS_PER_SEC, (double)sol_lapse / CLOCKS_PER_SEC);
-
+	printf("ooptimal_value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f\n", (double)sum / (100 * TIER), (double)gap / (100 * TIER), max_gap, (double)sol_lapse / (100 * TIER * CLOCKS_PER_SEC), (double)max / CLOCKS_PER_SEC);
 	return 0;
 }
