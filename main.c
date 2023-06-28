@@ -21,21 +21,19 @@ Nblocking_lower_again:下側から移動させた後もブロッキングブロ�
 int main(void)
 {
 	clock_t start = clock();
-	clock_t UB_lapse = 0;
+	clock_t max = 0;
 	clock_t sol_lapse = 0;
+	clock_t lapse = 0;
 
 	IntDequeue *stack = malloc(STACK * (sizeof *stack));
 	Array_initialize(stack);
 	int nblock = NBLOCK;
 	int i, j, x, l;
-	int k = 0;
 	int sum = 0;
-
 	int gap = 0;
-	int UB_gap = 0;
+	int max_gap = 0;
 
 	int timeup = 0;
-	int infeasible = 0;
 
 	char filename[BUFFER];
 	FILE *fp_write = NULL;
@@ -61,6 +59,7 @@ int main(void)
 			}
 		}
 
+		start = clock();
 		//*---LB1---*//
 		int LB1 = lower_bound1(stack);
 		printf("LB1:%d\n", LB1);
@@ -70,11 +69,8 @@ int main(void)
 		Array_print(stack);
 		int UB_cur = LB1;
 
-		clock_t time_start = clock();
 		int UB = UpperBound(stack);
-		UB_lapse += clock() - time_start;
 
-		time_start = clock();
 		int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both, 0, clock());
 
 		if (min_relocation == -1)
@@ -83,19 +79,18 @@ int main(void)
 		}
 		else
 		{
-			sol_lapse += clock() - time_start;
+			lapse = clock() - start;
+			sol_lapse += lapse;
+			if (max < lapse)
+			{
+				max = lapse;
+			}
 			sum += min_relocation;
 			gap += min_relocation - LB1;
-			if (UB != 0)
+			if (max_gap < min_relocation - LB1)
 			{
-				UB_gap += UB - min_relocation;
+				max_gap = min_relocation - LB1;
 			}
-			else
-				infeasible++;
-		}
-		if (min_relocation == LB1)
-		{
-			k++;
 		}
 		printf("min_relocation:%d,difference:%d\n", min_relocation, min_relocation - LB1);
 		fclose(fp);
@@ -111,16 +106,12 @@ int main(void)
 		if (a % 100 == 0)
 		{
 			nblock++;
-			fclose(fp_write);
+			// fclose(fp_write);
 		}
 	}
 	Array_terminate(stack);
-	clock_t end = clock();
 
 	putchar('\n');
-	printf("time:%f,match:%d,ave:%f,gap%f,timeup:%d,infeasible:%d,UB_gap:%f\n", (double)(end - start) / CLOCKS_PER_SEC, k, (double)sum / (100 * TIER), (double)gap / (100 * TIER - k), timeup, infeasible, (double)UB_gap / (100 * TIER - timeup - infeasible));
-
-	printf("UB_lapse:%f,sol_lapse:%f\n", (double)UB_lapse / CLOCKS_PER_SEC, (double)sol_lapse / CLOCKS_PER_SEC);
-
+	printf("optimal value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f,timeup:%d\n", (double)sum / (100 * TIER - timeup), (double)gap / (100 * TIER), max_gap, (double)sol_lapse / (CLOCKS_PER_SEC * (100 * TIER - timeup)), (double)max / CLOCKS_PER_SEC, timeup);
 	return 0;
 }

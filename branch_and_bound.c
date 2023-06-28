@@ -410,7 +410,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							{
 								return -1;
 							}
-							Deque(&q[j - STACK], &num_ret, dir);
+							Deque(&q[j - STACK], &num_ret, 1 - dir);
 
 #if TEST == 0
 							Array_print(q);
@@ -617,7 +617,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 								{
 									return -1;
 								}
-								Deque(&q[j], &num_ret, dir);
+								Deque(&q[j - STACK], &num_ret, 1 - dir);
 
 #if TEST == 0
 								Array_print(q);
@@ -656,7 +656,7 @@ int branch_and_bound(IntDequeue *q, int UB, int UB_cur, int LB, direction Dir, i
 							Array_print(q);
 #endif
 
-							ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, lower, j, start);
+							ans = branch_and_bound(q, UB, UB_cur, LB_temp + 1, dir, j, start);
 							if (ans != 0 && ans != -1)
 							{
 								return MinRelocation;

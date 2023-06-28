@@ -287,7 +287,7 @@ int UpperBound(const IntDequeue *q)
 		case both:
 			qsort(q_temp + 1, STACK - 1, sizeof(IntDequeue), (int (*)(const void *, const void *))pricmp);
 
-#if TEST == 0
+#if UB_TEST == 0
 			Array_print(q_temp);
 #endif
 
@@ -300,7 +300,7 @@ int UpperBound(const IntDequeue *q)
 			{
 				DequeFront(&q_temp[0], &num_ret);
 
-#if TEST == 0
+#if UB_TEST == 0
 				printf("Number Retrieval:%d\n", num_ret);
 				Array_print(q_temp);
 #endif
@@ -309,7 +309,7 @@ int UpperBound(const IntDequeue *q)
 			{
 				DequeRear(&q_temp[0], &num_ret);
 
-#if TEST == 0
+#if UB_TEST == 0
 				printf("Number Retrieval:%d\n", num_ret);
 				Array_print(q_temp);
 #endif
@@ -321,14 +321,14 @@ int UpperBound(const IntDequeue *q)
 				return UB;
 			}
 
-#if TEST == 0
+#if UB_TEST == 0
 			Array_print(q_temp);
 #endif
 		}
 		// 　積み替え操作　
 		UB++;
 
-#if TEST == 0
+#if UB_TEST == 0
 		printf("Block Relocation(depth=%d)\n", UB);
 #endif
 
@@ -379,7 +379,7 @@ int UpperBound(const IntDequeue *q)
 			if (Enque(&q_temp[j], PriorityEdge, dir) != -1)
 			{
 
-#if TEST == 0
+#if UB_TEST == 0
 				Array_print(q_temp);
 #endif
 
