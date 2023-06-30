@@ -112,6 +112,7 @@ int main(void)
 	Array_terminate(stack);
 
 	putchar('\n');
-	printf("optimal value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f,timeup:%d\n", (double)sum / (100 * TIER - timeup), (double)gap / (100 * TIER), max_gap, (double)sol_lapse / (CLOCKS_PER_SEC * (100 * TIER - timeup)), (double)max / CLOCKS_PER_SEC, timeup);
+	printf("optimal value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f,timeup:%d\n", (double)sum / (100 * TIER - timeup), (double)gap / (100 * TIER - timeup), max_gap, (double)sol_lapse / (CLOCKS_PER_SEC * (100 * TIER - timeup)), (double)max / CLOCKS_PER_SEC, timeup);
+	printf("timeup:%d\n", timeup);
 	return 0;
 }
