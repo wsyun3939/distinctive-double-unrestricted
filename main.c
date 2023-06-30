@@ -124,6 +124,7 @@ int main(void)
 	clock_t end = clock();
 
 	putchar('\n');
-	printf("ooptimal_value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f\n", (double)sum / (100 * TIER), (double)gap / (100 * TIER), max_gap, (double)sol_lapse / (100 * TIER * CLOCKS_PER_SEC), (double)max / CLOCKS_PER_SEC);
+	printf("ooptimal_value:%f,ave_gap:%f,max_gap:%d,ave_time:%f,max_time:%f\n", (double)sum / (100 * TIER - timeup), (double)gap / (100 * TIER - timeup), max_gap, (double)sol_lapse / ((100 * TIER - timeup) * CLOCKS_PER_SEC), (double)max / CLOCKS_PER_SEC);
+	printf("timeup:%d\n", timeup);
 	return 0;
 }
