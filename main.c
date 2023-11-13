@@ -38,76 +38,75 @@ int main(void)
 	char filename[BUFFER];
 	FILE *fp_write = NULL;
 
-	for (int a = NUMBER; a < NUMBER + 100 * TIER; a++)
+	for (int itr = 0; itr < TIER; itr++)
 	{
-		FILE *fp = NULL;
-		sprintf(filename, "../Benchmark/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
-		printf("%s\n", filename);
-
-		//	読み込みモードでファイルを開く
-		fp = fopen(filename, "r");
-
-		// スタック数と高さを読み込む　//
-		fscanf(fp, "%d %d", &i, &j);
-		for (i = 0; i < STACK; i++)
+		for (int a = 1; a <= 100; a++)
 		{
-			fscanf(fp, "%d ", &l);
-			for (j = 0; j < l; j++)
+			FILE *fp = NULL;
+			sprintf(filename, "../Benchmark2D/%d-%d-%d/%05d.txt", TIER, STACK, nblock, a);
+			printf("%s\n", filename);
+
+			//	読み込みモードでファイルを開く
+			fp = fopen(filename, "r");
+
+			// スタック数と高さを読み込む　//
+			for (i = 0; i < STACK; i++)
 			{
-				fscanf(fp, "%d ", &x);
-				EnqueRear(&stack[i], x);
+				for (j = 0; j < TIER; j++)
+				{
+					fscanf(fp, "%d ", &x);
+					if (x != 0)
+						EnqueRear(&stack[i], x);
+				}
 			}
-		}
 
-		start = clock();
-		//*---LB1---*//
-		int LB1 = lower_bound1(stack);
-		printf("LB1:%d\n", LB1);
+			start = clock();
+			//*---LB1---*//
+			int LB1 = lower_bound1(stack);
+			printf("LB1:%d\n", LB1);
 
-		qsort(stack, STACK, sizeof(IntDequeue), (int (*)(const void *, const void *))pricmp);
-		printf("sort:\n");
-		Array_print(stack);
-		int UB_cur = LB1;
+			qsort(stack, STACK, sizeof(IntDequeue), (int (*)(const void *, const void *))pricmp);
+			printf("sort:\n");
+			Array_print(stack);
+			int UB_cur = LB1;
 
-		int UB = UpperBound(stack);
+			int UB = UpperBound(stack);
 
-		int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both, 0, clock());
+			int min_relocation = branch_and_bound(stack, UB, UB_cur, LB1, both, 0, clock());
 
-		if (min_relocation == -1)
-		{
-			timeup++;
-		}
-		else
-		{
-			lapse = clock() - start;
-			sol_lapse += lapse;
-			if (max < lapse)
+			if (min_relocation == -1)
 			{
-				max = lapse;
+				timeup++;
 			}
-			sum += min_relocation;
-			gap += min_relocation - LB1;
-			if (max_gap < min_relocation - LB1)
+			else
 			{
-				max_gap = min_relocation - LB1;
+				lapse = clock() - start;
+				sol_lapse += lapse;
+				if (max < lapse)
+				{
+					max = lapse;
+				}
+				sum += min_relocation;
+				gap += min_relocation - LB1;
+				if (max_gap < min_relocation - LB1)
+				{
+					max_gap = min_relocation - LB1;
+				}
 			}
-		}
-		printf("min_relocation:%d,difference:%d\n", min_relocation, min_relocation - LB1);
-		fclose(fp);
+			printf("min_relocation:%d,difference:%d\n", min_relocation, min_relocation - LB1);
+			fclose(fp);
 
-		if (a % 100 == 1)
-		{
-			sprintf(filename, "../Benchmark/%d-%d-%d_unrestricted.csv", TIER, STACK, nblock);
-			fp_write = fopen(filename, "w");
+			if (a % 100 == 1)
+			{
+				sprintf(filename, "../Benchmark2D/%d-%d-%d(bb2d).csv", TIER, STACK, nblock);
+				fp_write = fopen(filename, "w");
+			}
+			if (fp_write != NULL)
+				fprintf(fp_write, "%d\n", min_relocation);
+			Array_clear(stack);
 		}
-		if (fp_write != NULL)
-			fprintf(fp_write, "%d\n", min_relocation);
-		Array_clear(stack);
-		if (a % 100 == 0)
-		{
-			nblock++;
-			// fclose(fp_write);
-		}
+		nblock++;
+		fclose(fp_write);
 	}
 	Array_terminate(stack);
 
